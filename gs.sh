@@ -1,5 +1,7 @@
 #!/bin/sh
 
+# git add & commit & push shell script by Jade
+
 #DATE=`date +%Y-%m-%d" "%H:%M`
 DATE=`date +%Y-%m-%d`
 MSG="$DATE 강의"
