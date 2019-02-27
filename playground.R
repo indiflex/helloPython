@@ -21,7 +21,7 @@ bt(3)
 
 # factor ####
 
-f = factor(2, levels=1:3, labels=c('A', 'B', 'C'))
+f = factor(2, levels=1:3, labels=c('A', 'B', 'C'), ordered = T)
 f
 nlevels(f)
 levels(f)
@@ -126,3 +126,61 @@ paste0('A', 'B')
 colnames(m)[10] = paste0(colnames(m)[10], 10)
 colnames(m)[20] = paste0(colnames(m)[20], 20)
 colnames(m[, c(10,20)])
+
+
+# data.frame ######
+df1 = data.frame(column1=11:15, column2=LETTERS[1:5])
+df1
+class(df1)
+str(m)
+str(df1)
+m
+data
+str(data)
+class(data)
+
+df2 = data[1:10, 1:6]
+df3 = data[1:10, c(1:3, 7,8)]
+df2
+df3
+cbind(df2, df3)
+
+df100 = data[101:110, 1:6]
+df100
+rbind(df2, df100)
+
+# list ######
+lst1 = list(a=1:3, b=4:7)
+lst1
+lst1$a
+str(lst1)
+names(lst1)
+
+lst3 = list(1:3, LETTERS[1:3], c(2.5, 4.5, 3.7, 'Q'))
+lst3
+names(lst3)
+str(lst3)
+
+unlist(lst3)
+
+m1
+as.data.frame(m1)
+data$수학
+tbl = table(data$수학)
+tbl
+as.data.frame(tbl)
+
+factor(5, levels = 1:5)
+as.factor(1:5)
+
+# Try This - chap.4 #######
+# 1
+df2
+df3
+df4 = cbind(df2, df3[, 4:5])
+df4
+
+# 2
+df4[, c(1:4, 7, 6, 8, 5)]
+cn = colnames(df4)
+df4[, c(1:4, '과학', '수학', '예체', '영어')]
