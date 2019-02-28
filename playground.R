@@ -183,4 +183,135 @@ df4
 # 2
 df4[, c(1:4, 7, 6, 8, 5)]
 cn = colnames(df4)
-df4[, c(1:4, '과학', '수학', '예체', '영어')]
+cn
+df4[, c(cn[1:4], '과학', '수학', '예체', '영어')]
+
+# built-in dataset ######
+data()
+dr = data()$result
+str(dr)
+head(dr)
+class(dr)
+dr[, 'Item']
+
+data("AirPassengers")
+class(AirPassengers)
+AirPassengers
+
+data("trees")
+trees
+class(trees)
+head(trees)
+letters
+LETTERS
+month.name
+month.abb
+pi
+letters = c('AA', 'BB', 'CC')
+letters
+rm(letters)
+ls(pattern = 'Air')
+
+# packages ######
+install.packages('data.table')
+
+library('data.table')
+
+start = Sys.time()
+#
+read.csv('data/성적.csv')
+#fread('data/성적.csv', encoding = 'UTF-8')
+Sys.time() - start
+
+head(data)
+
+## read sep file #######
+sepdata = read.delim('data/sep.txt', sep='#')
+str(sepdata)
+sepdata$name = as.character(sepdata$name)
+View(head(sepdata))
+summary(sepdata)
+
+## read tsv ######
+tsvdata = read.table("data/tcv.tsv", sep='\t', header = T, stringsAsFactors=F)
+str(tsvdata)
+summary(tsvdata)
+View(tsvdata)
+
+## read fwf ########
+fwfdata = read.fwf('data/fwf.txt', header=F, width=c(8, 6, 5, 3, 4))
+fwfdata
+str(fwfdata)
+summary(fwfdata)
+
+## read excel file #########
+install.packages('readxl')
+library('readxl')
+mtx = read_excel('data/meltop100.xlsx', sheet = 1, col_names =T)
+mtx
+colnames(mtx) = NULL
+
+## Try This - read data file ######
+# 1
+nrow(mtx)
+tail(mtx[-nrow(mtx), ])
+mtx = mtx[-nrow(mtx), ]   # remove last row
+tail(mtx)
+mtx = mtx[, -(2:4)]
+save(mtx, file = 'data/meltop_rm_last.rda')
+str(mtx)
+tail(mtx)
+mtx$가수
+save(mtx, file = 'data/meltop100.rda')
+rm(mtx)
+load('data/meltop100.rda')
+
+# 2
+mtc = read.csv('data/mtc.csv')
+summary(mtc)
+tail(mtc)
+
+# 3
+temper = read.fwf('data/temper.txt', header=F, width=c(15, 4, 68, 5, 1))
+temper  # V2, V4, V5
+temper$V1 = NULL
+temper$V3 = NULL
+temper = temper[, c(2,4,5)]
+
+## chap7. #########
+data
+boxplot(data$수학)
+hist(data$수학)
+data[data$학번 == 10337, ]
+
+km = data[data$국어 > 90 & data$수학 > 90, ]
+km
+km[order(km$수학), ]
+mean(data$수학)
+sum(data$수학)
+median(data$수학)
+
+(data$국어 + data$영어 + data$수학) / 3
+colnames(data)
+data$총점 = data[,4] + data[,5] + data[,6]
+head(data)
+data$총점 = NULL
+
+aggregate(data=data, 수학~반, mean)
+aggregate(data=data, cbind(국어,영어,수학)~반, mean)
+
+# install.packages('psych')
+library('psych')
+describe(data)
+describe(data, IQR=T)
+summary(data)
+View(data)
+data$avg = (data[,4] + data[,5])
+head(data)
+data$avg = NULL 
+## Try This - Row Operator ######
+# 1
+km2 = data[data$반 == '난' & data$성별 == '남' & data$국어 > 90 & data$수학 > 90, ]
+km2
+
+# 2
