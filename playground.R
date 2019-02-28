@@ -311,7 +311,39 @@ head(data)
 data$avg = NULL 
 ## Try This - Row Operator ######
 # 1
+data
 km2 = data[data$반 == '난' & data$성별 == '남' & data$국어 > 90 & data$수학 > 90, ]
-km2
+km2[order(-km2$국어),]
 
 # 2
+data$평균 = (data[, 4] + data[, 5] + data[, 6] + data[, 7] + data[, 8])/5
+head(data)
+aggregate(data=data[data$국어 >= 80,], cbind(국어, 평균)~반, mean)
+
+# ifelse #########
+data$pass = ifelse(data$평균 >= 60, TRUE, FALSE)
+data[data$pass, ]
+
+data$scout = ifelse(data$평균 >= 60, 
+                    ifelse(data$성별 == '남', 'BoyScout', 'GirlScout'),
+                    '')
+head(data, 20)
+library(ggplot2)
+
+qplot(data$pass)
+
+## Try This #######
+# 1 - scout
+qplot(data[data$scout != '',]$scout)
+
+# 2
+data$학점 = ifelse(data$평균 >= 90, 'A',
+                 ifelse(data$평균 >= 80, 'B', 
+                        ifelse(data$평균 >= 70, 'C',
+                               ifelse(data$평균 >= 60, 'D', 'F'))))
+
+
+head(data)
+
+# 3 
+qplot(data$학점)
