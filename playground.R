@@ -1,3 +1,5 @@
+Sys.sleep(10)
+
 # practice ####
 fn3 = function(d, n=3) {
   print(head(d, n))
@@ -347,3 +349,193 @@ head(data)
 
 # 3 
 qplot(data$학점)
+
+
+
+## ggplot2::mpg #######
+library(ggplot2)
+mpg = as.data.frame(ggplot2::mpg)
+summary(mpg)
+colnames(mpg)
+head(mpg)
+mpg$fl
+?mpg
+
+midwest = as.data.frame(ggplot2::midwest)
+summary(midwest)
+colnames(midwest)
+head(midwest)
+midwest
+data
+# 1
+mpg$cthw = mpg$cty + mpg$hwy
+head(mpg)
+mpg[order(-mpg$cthw),]
+
+# 2
+x = aggregate(data=mpg, cthw~(year+fl), mean)
+x[order(x$year), ]
+
+# 3
+midwest = as.data.frame(ggplot2::midwest)
+midwest
+summary(midwest)
+library(psych)
+describe(midwest)
+describe(midwest[,4:27], na.rm = T)
+colnames(midwest)
+head(midwest)
+aggregate(data=midwest, cbind(poptotal, popdensity, popasian)~state, mean)
+
+# 4
+colnames(midwest)
+colnames(midwest)[5] = 'total'
+colnames(midwest)[10] = 'asian'
+
+# 5
+ta = sum(midwest$asian)
+midwest$asianpct = (midwest$asian / ta) * 100
+sum(midwest$asianpct)
+hist(midwest$asianpct)
+library(ggplot2)
+plot(midwest$asianpct)
+
+# 6
+midwest[order(midwest$asianpct),]
+aggregate(data=midwest, asianpct~state, mean)
+y = midwest[, c(2:3, 10,15,29)]
+tt = y[order(-y$asianpct),]
+head(tt)
+tail(tt)
+avg_a = mean(midwest$asianpct)
+midwest$asianrate = ifelse(midwest$asianpct > avg_a, 'lg', 'sm')
+head(midwest)
+qplot(midwest$asianrate)
+
+# rep & seq #######
+seq(1,10, by=2)
+rep(1, times=3)
+rep(LETTERS[1:3], times=3)
+rep(LETTERS[1:3], each=3)
+rep(c('I', 'am'), each=2, length.out=7)
+
+rep(c('김일수', '김이수'), each=2)
+
+data.frame(customer=rep(c('김일수', '김이수'), each=2), 
+           menu=rep(c('짜장', '짬뽕'), times=2) )
+
+1:10
+-3:5
+5.5:-4.5
+seq(from=1, to=10, by=0.5)
+seq(5.4, -8.5, length.out=10)
+
+# runif & sample #########
+runif(20) 
+t = runif(n=30, min=10, max=20)
+t
+plot(t[order(t)])
+
+set.seed(100); sample(1:5, size=3)
+sample(1:5, size=3)
+
+sample(1:50, size=30, replace = F)
+data
+data[sample(1:nrow(data), size=5),]
+
+colnames(data)
+
+data
+print("aaaaaaaaaa")
+cat(nrow(data), nrow(data[data$c1 == 'AA',]))
+data$c1 = sample(c('AA', 'BB'), size=nrow(data), replace=T)
+data$c1 = sample(c('AA', 'BB'), size=nrow(data), replace=T, prob = c(0.5,0.5))
+
+set.seed(255)
+smdt = data.frame(stuno = 1:5, 
+                  Korean=sample(60:100, 5),
+                  English=sample((5:10) * 10, 5),
+                  Math=sample(50:100, 5))
+smdt
+
+## string #########
+s = "abc,efg,abc"
+nchar(s)
+toupper(s)
+substr(s, 1, 5)
+x=strsplit(s, ',')
+class(x)
+sub('abc', 'ttt', s)
+gsub('abc', 'ttt', s)
+sub(pattern='abc/g', replacement='ttt', x=s)
+sub(pattern='^abc/g', replacement='ttt', x=s)
+s = "first\tsecond\nthird"
+print(s)
+cat(s)
+paste0('aaa-bbb', 'ccc-ddd')
+data[1:3, '반']
+paste(data[1:3, '반'])
+paste(data[1:3, '반'], collapse='**')
+
+outer(month.abb, 2011:2020, paste, sep='-')
+outer(LETTERS, 2010:2020, paste0)
+
+grep(pattern='^2.+0$', x=data$학번, value = T)
+data$학번
+
+s = "aBc,efg,abc,"
+gsub(pattern='[,]+a.+', replacement='ttt', x=s, ignore.case = T)
+gsub(pattern='[,]+a(.*)', replacement='ttt', x=s, ignore.case = T)
+gsub(pattern='[,]+[ae].*,', replacement='ttt', x=s, ignore.case = T)
+s
+
+Sys.time()
+d1 = as.Date('2019-03-05 09:00')
+class(d1)
+d1
+dt1 = as.POSIXct('2019-03-04 09:00')
+class(dt1)
+seq(dt1, as.POSIXct('2019-04-02'), by='day')
+seq(dt1, as.POSIXct('2019-04-01'), by='2 hour')
+seq(dt1, as.POSIXct('2019-04-01 23:59'), by='min')
+
+install.packages('lubridate')
+library(lubridate)
+ymd('20190305')
+mdy('03052019')
+year(dt1)
+day(dt1) = 15
+dt1
+days_in_month(1:12)
+ddays(10)
+duration(1000)
+round(as.POSIXct('2019-03-05 18:39:45'), 'min') 
+x = 5
+f = function(n) {
+  print(paste('x=', x, n))
+}
+f(x<-30)
+x
+
+for (i in 1:3) { print(i) }
+switch(2, "111", "222", "333")
+for (r in 1:nrow(data)) { print (data[r, 'scout']) }
+
+while(i < 10) { print(i); i = i + 1 }
+
+i = 0
+while(TRUE) { 
+  i = i + 1
+  #print(i %% 2)
+  if (i %% 2 == 0)
+    next
+  
+  if (i > 10)
+    break
+  
+  print(i)
+}
+
+x
+
+
