@@ -510,12 +510,22 @@ days_in_month(1:12)
 ddays(10)
 duration(1000)
 round(as.POSIXct('2019-03-05 18:39:45'), 'min') 
+
 x = 5
+5+5 -> x
 f = function(n) {
-  print(paste('x=', x, n))
+  print(paste('x=', x, ', n=', n))
 }
-f(x<-30)
+#f(n = 30)  vs f(n <- 30)
+x=10
+f2 = function(n) {
+  #x = n
+  x <<- n
+  print(paste('x=', x, ', n=', n))
+}
+f2(50)
 x
+
 
 for (i in 1:3) { print(i) }
 switch(2, "111", "222", "333")
@@ -536,6 +546,37 @@ while(TRUE) {
   print(i)
 }
 
-x
+# apply ######
+apply(smdt[, 2:4], MARGIN = 2, FUN = mean)
+smdt
 
+apply(smdt[, 2:4], MARGIN = 2, FUN = quantile)
+
+l = lapply(smdt[, 2:4], FUN = mean)
+l
+unlist(l)
+
+sapply(smdt[, 2:4], FUN = mean, simplify = T)
+apply(smdt[, 2:4], MARGIN = 2, FUN = mean)
+
+vapply(smdt[, 2:4], FUN = mean, FUN.VALUE = 10)
+smdt
+
+library('reshape2')
+dim(data)
+data.frame(no=1:4, year=2016:2019)
+list(1:4, paste0('Q', 1:4))
+matrix(round(runif(16), 3) * 1000, ncol=4, dimnames = list(NULL, paste0('Q', 1:4)))
+
+dfsum = cbind( data.frame(no=1:4, year=2016:2019), 
+               matrix(round(runif(16), 3) * 1000, ncol=4, dimnames = list(NULL, paste0('Q', 1:4))) )
+dfsum
+melt(data=dfsum[,2:6], id.vars = "year")
+meltsum = melt(dfsum[,2:6], id.vars = "year", variable.name = 'Sales')
+meltsum
+
+dcast(meltsum, Sales~year, value.var="value")
+dfsum
+
+smdt[order(smdt$Korean),]
 
