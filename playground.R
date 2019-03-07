@@ -658,3 +658,147 @@ ad1 = dataArray[,,1]
 ad1
 attr(dataArray, "dim") = c(3,8)
 dataArray
+
+#### dplyr #######
+smdt
+data = read.csv('data/성적.csv')
+head(data)
+library(dplyr)
+library(ggplot2)
+data = dplyr::rename(data, math=수학)
+a.b = 123
+
+attach(data)
+data$국어 + data$수학
+mean(국어)
+sum(math)
+detach(data)
+
+with(data, mean(math))
+
+data[data$group == 'C조',]
+data %>% filter(group == 'C조') 
+data %>% filter(group %in% c('A조', 'C조'))
+data %>%
+  filter(group == 'C조') %>%
+  select(-반, -영어) %>% head
+
+d1 = data
+d1 = rename(d1, math=)
+head(d1)
+mean(d1$math)
+d1 = rename(d1, kor=math)
+
+select(data, math)
+plot(data$math)
+
+data = dplyr::rename(data, math=수학)
+data = dplyr::rename(data, kor=국어, sci=과학, eng=영어, art=예체)
+data = dplyr::rename(data, stuno=학번, cls=반, gen=성별)
+head(data)
+
+data %>% arrange(desc(math)) %>% head
+data %>% arrange(math, desc(eng)) %>% head
+
+data %>% mutate(subTotal = kor + eng + math) %>% head
+data
+
+data %>%
+  mutate(kor_eng = kor + eng) %>%
+  arrange(desc(kor_eng)) %>%
+  head
+
+x = data %>% summarize(t = mean(math))
+class(x)
+class(mean(data$math))
+
+?summarise
+
+data %>% group_by(cls) %>% summarise(m = mean(math))
+data %>% head
+
+data %>% 
+  group_by(cls, gen) %>%
+  summarise(mean_math = mean(math),
+            sum_math = sum(math),
+            medi_math = median(math),
+            n_math = n()) %>%
+  arrange(cls, gen, desc(mean_math))
+
+
+data %>% 
+  group_by(cls, gen) %>%
+  summarise(mean_math = mean(math),
+            sum_math = sum(math),
+            medi_math = median(math),
+            n_math = n()) %>%
+  group_by(gen) %>%
+  summarise(mean_gen = mean(mean_math)) %>%
+  arrange(gen, desc(mean_gen))
+
+### join ########
+dfsum = cbind( data.frame(yno=1:4, year=2016:2019), 
+               matrix(round(runif(16), 3) * 1000, ncol=4, dimnames = list(NULL, paste0('Q', 1:4))))
+dfsum
+sales = cbind( data.frame(no=1:12, year=2016:2019), 
+               matrix(round(runif(144), 3) * 100000, ncol=12, dimnames = list(NULL, month.abb)) )
+sales
+
+left_join(sales, dfsum, by=c('year' = 'year'))
+right_join(sales, dfsum, by=c('year' = 'year'))
+
+inner_join(sales, dfsum, by=c('year' = 'year', 'no' = 'yno'))
+semi_join(sales, dfsum, by=c('year' = 'year', 'no' = 'yno'))
+full_join(sales, dfsum, by=c('year' = 'year', 'no' = 'yno'))
+anti_join(sales, dfsum, by=c('no' = 'yno'))
+
+topsale4 = sales[1:4,] %>% select(year, Jan, Apr, Jul, Oct)
+top4 = sales[5:8,] %>% 
+  select(1:4, year, Jan, Apr, Jul, Oct) %>% 
+  rename(yno=no, Q1=Jan, Q2=Apr, Q3=Jul, Q4=Oct)
+
+topsale4
+top4
+dfsum
+bind_rows(dfsum, topsale4)
+bind_rows(dfsum, top4)
+bind_rows(dfsum, top4, .id = 'group')
+
+bind_cols(dfsum, top4)
+cbind(dfsum, top4)
+bind_cols(dfsum, top4) %>% select(-year1, -yno1, -Feb)
+
+
+###### Try This : dplyr #############
+# 1
+
+mpg = as.data.frame(ggplot2::mpg)
+mpg
+mpg %>% filter(class %in% c('suv', 'compact')) %>%
+  select(model, cty, hwy) %>% head
+
+# 2 
+mpg %>% arrange(desc(hwy)) %>% head(5)
+
+# 3
+mpg %>%
+  filter(class == 'suv') %>%
+  group_by(manufacturer) %>%
+  summarise(m = mean( (cty + hwy) / 2)) %>%
+  arrange(desc(m)) %>%
+  head(5)
+
+# 4
+t = table(mpg$fl)
+n = names(t)
+n
+dput(n)
+
+
+flpr = data.frame(fl = c("c", "d", "e", "p", "r"),
+                  price = c(1.33, 1.02, 0.92, 1.99, 1.22), stringsAsFactors = F )
+flpr
+class(mpg$fl)
+
+mpg = inner_join(mpg, flpr, by=c('fl', 'fl')) %>% rename(fl_price = price) %>% head
+mpg
