@@ -580,3 +580,81 @@ dfsum
 
 smdt[order(smdt$Korean),]
 
+
+### Try This - PF ############
+# 1
+data = read.csv('data/성적.csv')
+data
+sample(c(rep('A조', 160), rep('B조', 160), rep('C조', 160))) -> data$group
+head(data, 100)
+
+# 2
+# fibonacci.R 참조
+
+# 3
+set.seed(255)
+smdt = data.frame(stuno = 1:5, 
+                  Korean=sample(60:100, 5),
+                  English=sample((5:10) * 10, 5),
+                  Math=sample(50:100, 5))
+smdt
+class(smdt$Korean)
+class(smdt$Math)
+smdt[nrow(smdt) + 1, ] = c('계', sapply(smdt[, 2:4], FUN = mean, simplify = T))
+
+smdt$Korean = as.integer(smdt$Korean)
+smdt[, 2:4] = as.integer(smdt[, 2:4])
+for (i in 2:4) {
+  smdt[, i] = as.integer(smdt[, i])
+}
+class(smdt[, 2:4])
+
+smdt$total = apply(smdt[, 2:4], MARGIN = 1, FUN = sum)
+smdt$avg = apply(smdt[, 2:4], MARGIN = 1, FUN = mean)
+smdt
+smdt$avg = round(smdt$avg)
+matrix(round(runif(48), 3) * 100000, ncol=12, 
+       dimnames = list(NULL, month.abb))
+sales = cbind( data.frame(no=1:4, year=2016:2019), 
+               matrix(round(runif(48), 3) * 100000, ncol=12, 
+                      dimnames = list(NULL, month.abb)) )
+sales
+melt(data=sales[,2:ncol(sales)], id.vars = "year", variable.name = 'month', value.name = 'saleamt')
+
+
+######## order, sort ###############
+smdt[order(smdt$avg, -smdt$Korean),]
+t = c(5, 7, 2, 8, 20, 11, 19)
+t[order(t)]
+rev(t)
+sort(t)
+
+#### missing values #########
+t = c(1:5, NA, 7, NA, 9, 10)
+mean(t, na.rm = T)
+t[!is.na(t)]
+mean(t[!is.na(t)])
+table(data$반)
+is.na(t)
+table(is.na(t))
+t[is.na(t)]
+t = ifelse(is.na(t), 0, t)
+t
+
+m1 = m2 = m3 = matrix(c(1:3, NA, 9:3, NA, 1:3), nrow=3)
+m1
+m1[is.na(m1)] = 0 
+m2
+m2[is.na(m2[,2]), 2] = 5555
+
+dataArray = array(1:24, dim=c(3, 4, 2)) 
+dataArray
+dim(dataArray)
+
+dimnames(dataArray)
+dimnames(dataArray) = list( 1:3, c('c1', 'c2', 'c3', 'c4'), c('x','y'))
+
+ad1 = dataArray[,,1]
+ad1
+attr(dataArray, "dim") = c(3,8)
+dataArray
