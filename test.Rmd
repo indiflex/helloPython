@@ -1,15 +1,29 @@
 ---
 title: "test"
 author: "Jade"
-date: '2019년 3월 14일'
+date: "2019년 3월 14일"
 output:
+  # pdf_document: default
   html_document: default
-  # pdf_document: default 
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
+```{r}
+load('data/data_eng.rda')
+head(data)
+```
+
+## test plot
+```{r}
+library(ggplot2)
+library(dplyr)
+ggplot(data %>% filter(stuno >= 30000) %>% filter(kor > 80), aes(cls, kor)) +
+  geom_point(aes(color=cls, size=kor), 
+             alpha=0.3)
+```
+
 
 ## R Markdown
 
@@ -31,10 +45,7 @@ plot(pressure)
 
 Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
 
-```{r}
-load('data/data_eng.rda')
-head(data)
-```
+
 ----
 ```{r}
 
