@@ -10,18 +10,34 @@ output:
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
+
 ```{r}
+library(ggplot2)
+library(dplyr)
+
+theme_set(theme_gray(base_family="AppleGothic"))
+par(family = "AppleGothic")
+
 load('data/data_eng.rda')
+
 head(data)
 ```
 
 ## test plot
 ```{r}
-library(ggplot2)
-library(dplyr)
 ggplot(data %>% filter(stuno >= 30000) %>% filter(kor > 80), aes(cls, kor)) +
   geom_point(aes(color=cls, size=kor), 
              alpha=0.3)
+```
+
+----
+```{r}
+ggplot(mpg, aes(cty)) +
+  geom_density(aes(fill=factor(cyl)), alpha=0.8) +
+  labs(title="밀도그래프", subtitle = "실린더수에 따른 시내연비의 밀도그래프",
+       caption="Source: ggplot2::mpg",
+       x = "도시 연비",
+       fill = "실린더수")
 ```
 
 
