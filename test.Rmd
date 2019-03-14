@@ -18,7 +18,9 @@ library(dplyr)
 theme_set(theme_gray(base_family="AppleGothic"))
 par(family = "AppleGothic")
 
-load('data/data_eng.rda')
+midwest = as.data.frame(ggplot2::midwest)
+mpg = as.data.frame(ggplot2::mpg)
+load('data/data_eng.rda')   # save(data, file='data/data_eng.rda')
 
 head(data)
 ```
