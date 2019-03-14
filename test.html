@@ -204,7 +204,9 @@ library(dplyr)</code></pre>
 <pre class="r"><code>theme_set(theme_gray(base_family=&quot;AppleGothic&quot;))
 par(family = &quot;AppleGothic&quot;)
 
-load('data/data_eng.rda')
+midwest = as.data.frame(ggplot2::midwest)
+mpg = as.data.frame(ggplot2::mpg)
+load('data/data_eng.rda')   # save(data, file='data/data_eng.rda')
 
 head(data)</code></pre>
 <pre><code>##   stuno cls gen kor eng math sci art
