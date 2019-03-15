@@ -811,8 +811,7 @@ plot(smdt)
 par(prePar)
 plot(data$eng, main='영어성적')
 
-theme_set(theme_gray(base_family="AppleGothic"))
-par(family = "AppleGothic")
+
 
 plot(x=1, y=1)
 plot(x=1:10, y=1:10)
@@ -914,6 +913,8 @@ ggplot(data=smdt) +
 data
 d = data %>% filter(stuno >= 30000)
 d
+library(ggplot2)
+library(dplyr)
 ggplot(d %>% filter(kor > 80), aes(cls, kor)) +
   geom_point(aes(color=cls, size=kor), 
              alpha=0.3)
@@ -983,5 +984,13 @@ g4 = ggplot(mpg, aes(cty)) +
        x = "도시 연비",
        fill = "실린더수")
 
+
+theme_set(theme_gray(base_family="AppleGothic"))
+par(family = "AppleGothic")
+last_plot()
+
 g3
 grid.arrange(g3, grid.arrange(g2, g4, ncol=2), ncol=1)
+
+data
+save(data, file = 'data/data_eng.rda')
