@@ -1,5 +1,7 @@
 Sys.sleep(10)
 
+
+
 # practice ####
 fn3 = function(d, n=3) {
   print(head(d, n))
@@ -985,8 +987,10 @@ g4 = ggplot(mpg, aes(cty)) +
        fill = "실린더수")
 
 
-theme_set(theme_gray(base_family="AppleGothic"))
-par(family = "AppleGothic")
+setFont = function() {
+  theme_set(theme_gray(base_family="AppleGothic"))
+  par(family = "AppleGothic")
+}
 last_plot()
 
 g3
@@ -994,3 +998,201 @@ grid.arrange(g3, grid.arrange(g2, g4, ncol=2), ncol=1)
 
 data
 save(data, file = 'data/data_eng.rda')
+
+
+## Try This: ggplot2 ########
+
+# 1 
+setFont()
+d4 = mpg %>% group_by(year, displ) %>% summarise(m1 = mean(cty), m2 = mean(hwy))
+
+ggplot(d4, aes(x=displ)) + 
+  geom_line(data = d4 %>% filter(year==1999), aes(y=m1, color='1999 cty')) +
+  geom_line(data = d4 %>% filter(year==1999), aes(y=m2, color='1999 hwy')) +
+  geom_line(data = d4 %>% filter(year==2008), aes(y=m1, color='2008 cty'), size=1) +
+  geom_line(data = d4 %>% filter(year==2008), aes(y=m2, color='2008 hwy'), size=1) +
+  scale_colour_manual("", breaks = c("1999 cty", "1999 hwy", "2008 cty", "2008 hwy"),
+                      values = c("gray", "pink", "blue", "darkblue")) +
+  xlab("배기량") +
+  scale_y_continuous("연비", limits = c(0, 50)) +
+  labs(title = '연도별 통합연비', subtitle = '(굵은선은 2008년)') -> g4
+
+ggplotly(g4)
+
+# 2
+d5 = data %>% filter(kor >= 80)
+d5
+ggplot(data %>% filter(kor >= 80), aes(cls)) +
+  geom_bar(aes(fill=gen), width=0.7) +
+  xlab('학급') + ylab('학생수') +
+  labs(title = "국어 우수 학생", subtitle = "(80점 이상)", fill='성별')
+
+# 3
+ggplot(data[data$kor >= 95, ], aes(kor)) +
+  geom_density(aes(fill=factor(cls)), alpha = 0.5) + xlab('국어성적') +
+  labs(title = "반별 국어 우수 학생", subtitle = "국어성적 A+", 
+       fill='학급', caption = "기준점수 >= 95")
+
+# 4
+# d7 = midwest %>% filter(poptotal <= 500000 & popasian <= 10000)
+# nrow(midwest)
+# nrow(d7)
+
+ggplot(midwest) + 
+  geom_point(aes(x=poptotal, y=popasian), alpha = 0.5) +
+  xlab('전체인구') + ylab("아시아계인구") +
+  xlim(0, 500000) + ylim(0, 10000) +
+  labs(title = "전체인구 대비 아시아계 인구")
+
+
+#### perspective ##########
+x = 1:5
+y = 1:3
+z = outer(x, y, function(x,y) { x + y })
+persp(x, y, z, theta = 30, phi = 30)
+
+for (i in 1: 12) {
+  persp(x, y, z, theta = 30, phi = i * 30)
+  Sys.sleep(0.2)
+}
+
+x = seq(-10, 10, length=30); y = x
+x
+f = function(x, y) {
+  r = sqrt(x^2 + y^2)
+  return (10 * sin(r) / r)
+}
+
+z = outer(x, y, f)
+persp(x, y, z, theta = 45, phi = 30, expand = 0.5, col='lightblue',
+      ltheta = 120, shade = 0.75)
+
+persp(x, y, z, theta = 45, phi = 30, expand = 0.5, col='lightblue',
+      ltheta = 120, shade = 0.75, ticktype='detailed',
+      xlab = 'X', ylab = 'Y', zlab = "Sinc(r)")
+
+
+## Choropleth Map ########
+head(USArrests)
+str(USArrests)
+rownames(USArrests)
+library(ggiraphExtra)
+library(tibble)
+chodata = rownames_to_column(USArrests, var = 'state')
+chodata
+chodata$state = tolower(chodata$state)
+head(chodata)
+nrow(chodata)
+chodata$sta = substr(chodata$sta, 1, 3)
+
+chodata = data.frame(state = tolower(rownames(USArrests)), USArrests)
+
+install.packages('ggiraphExtra')
+install.packages('maps')
+library(ggiraphExtra)
+usmap = map_data('state') 
+str(usmap)
+head(usmap)
+ggChoropleth(data=chodata,
+             aes(fill=Murder, map_id=state),
+             map = usmap,
+             title = 'US Murder',
+             reverse = F,
+             interactive = T)
+
+ggplot(chodata, aes(map_id = state)) + 
+  geom_map(aes(fill = Murder), map = usmap) + 
+  expand_limits(x = usmap$long, y = usmap$lat) +
+  scale_fill_gradient2('Murder',
+                       low="red", 
+                       mid='green',
+                       high='blue') +
+  labs(title="USA Murder", fill = 'Murder')
+
+
+sprintf('name=%s, %.0f', 'Hong', pi)
+class(chodata$state)
+
+
+tooltips = paste0(
+  '<meta charset="utf-8">',
+  sprintf("<p><strong>%s</strong></p>", as.character(chodata$state)),
+  '<table>',
+  '  <tr>',
+  '    <td>인구(만)</td>',
+  sprintf('<td>%.0f</td>', chodata$UrbanPop * 10),
+  '  </tr>',
+  '  <tr>',
+  '    <td>살인</td>',
+  sprintf('<td>%.0f</td>', chodata$Murder),
+  '  </tr>',
+  '  <tr>',
+  '    <td>폭력</td>',
+  sprintf('<td>%.0f</td>', chodata$Assault),
+  '  </tr>',
+  '</table>' )
+
+tooltips
+onclick = sprintf("alert(\"%s\")", as.character(chodata$state))
+onclick
+
+install.packages('stringi')
+library(stringi)
+stringi::stri_enc_toutf8(tooltips)
+
+enc2utf8(tooltips)
+enc2native(tooltips)
+encodeString('cp949')
+Sys.getlocale()
+
+library(ggiraph)
+ggplot(chodata, aes(data = Murder, map_id = state)) +
+  geom_map_interactive( 
+    aes(fill = Murder,
+        data_id = state,
+        tooltip = enc2utf8(tooltips),
+        onclick = onclick), 
+    map = usmap) +
+  expand_limits(x = usmap$long, y = usmap$lat) +
+  scale_fill_gradient2('살인', low='red', high = "blue", mid = "green") +
+  labs(title="USA Murder") -> gg_map
+
+ggiraph(code = print(gg_map))
+girafe(ggobj = gg_map)
+
+
+### 우리나라 ########
+install.packages('devtools')
+
+# devtools::install_github("cardiomoon/kormaps2014")
+library(kormaps2014)
+# kdata = kormaps2014::changeCode(korpop1)   # do not need
+kdata = korpop1
+head(kdata)
+head(kormap1)
+colnames(kdata)
+kdata = kdata %>% rename(pop = 총인구_명)
+kdata = kdata %>% rename(area = 행정구역별_읍면동)
+# kdata$area = stringi::stri_enc_toutf8(kdata$area)  # windows only
+save(kdata, file='data/kdata.rda')
+
+ggChoropleth(data=kdata, 
+             aes(fill = pop, map_id = code, tooltip = area),
+             map = kormap1,
+             interactive = T)
+
+rm(kdata)
+
+ggplot(kdata, aes(data = pop, map_id = code)) +
+  geom_map( aes(fill = pop), map = kormap1) + 
+  expand_limits(x = kormap1$long, y = kormap1$lat) +
+  scale_fill_gradient2('인구', low='darkblue') +
+  xlab('경도') + ylab('위도') + 
+  labs(title="시도별 인구")
+
+
+## plotly ######
+ggplot(data, aes(eng, kor)) +
+  geom_point(aes(color=eng, size=kor), alpha=0.3) -> t
+
+ggplotly(t)
