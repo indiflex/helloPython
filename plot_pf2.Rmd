@@ -1,0 +1,114 @@
+---
+title: "빅데이터 시각화 포플 #2"
+author: "Jade"
+date: '2019년 3월 18일'
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(dplyr)
+library(ggplot2)
+library(ggiraphExtra)
+library(stringi)
+library(ggiraph)
+library(kormaps2014)
+
+class(tbc$year)
+year %in% 2016:2015
+
+load('data/chodata.rda')
+usmap = map_data('state')
+```
+
+## 1. 미국의 범죄율(Murder, Assault, UrbanPop, Rape)을 한번에 작도하시오.
+```{r}
+head(chodata)
+ggChoropleth(data=chodata,
+             aes(fill=c(Murder, Assault, UrbanPop, Rape), map_id=state),
+             map = usmap, interactive = T)
+
+```
+
+## 2. 미국 범죄율의 Rape부분을 단계 구분도로 작성하시오.
+(단, 툴팁은 그림과 같이 표현하고, 클릭시 해당 state의 wikipedia 페이지를 보이도록 HTML로 저장하시오)
+```{r}
+unitString = stringi::stri_escape_unicode('만')
+tooltip2 = paste0(
+  sprintf("<p><strong>%s</strong></p>", as.character(chodata$state)),
+  sprintf('<p> <strong>%.0f</strong> / %.0f %s</p>',
+          chodata$Rape,  chodata$UrbanPop * 10, unitString)
+)
+
+onclick2 = sprintf('window.open(\"http://en.wikipedia.org/wiki/%s\")', as.character(chodata$state))
+
+ggplot(chodata, aes(data = Rape, map_id = state)) +
+  geom_map_interactive( 
+    aes(fill = Rape,
+        data_id = state,
+        tooltip = tooltip2,
+        onclick = onclick2), 
+    map = usmap) +
+  expand_limits(x = usmap$long, y = usmap$lat) +
+  scale_fill_gradient2('Rape', low='red', high = "blue", mid = "green") +
+  labs(title="USA Rape") -> gg_map2
+
+```
+
+```{r, echo=F, include=F}
+ggiraph(code = print(gg_map2))
+```
+```{r}
+girafe(ggobj = gg_map2)
+```
+
+
+## 3. 시도별 결핵환자수(kormaps::tbc)를
+단계 구분도로 작성하시오.(우리나라)
+(단, 환자수는 2006년부터 2015년 총합, NA인 지역은 0으로 표시할 것)
+```{r}
+head(tbc)
+# tbc %>% distinct(year)
+tbc$NewPts[is.na(tbc$NewPts)] = 0
+# tbc$NewPts = ifelse(is.na(tbc$NewPts), 0, tbc$NewPts)
+tt = tbc %>% filter(year %in% 2006:2015) %>% group_by(code, name1) %>% summarise(pa = sum(NewPts))
+tt$pa = ifelse(is.na(tt$pa), 0, tt$pa)
+tt$pa[is.na(tt$pa)] = 0
+tt
+ggChoropleth(data=tt, 
+             aes(fill = pa, map_id = code, tooltip = name1),
+             map = kormap1, title = '시도별 결핵환자수',
+             interactive = T) 
+```
+
+```{r}
+tooltips3 = paste0(
+  sprintf("<p><strong>%s</strong></p>", as.character(tt$name)),
+  '<table>',
+  '  <tr>',
+  sprintf('<td>결핵환자수 : %.0f 명</td>', tt$pa),
+  '  </tr>',
+  '</table>')
+
+# 작도
+tbc_map = ggplot(tt, aes(data = pa, map_id = code)) +
+  geom_map_interactive( aes(fill = pa,
+                            tooltip = tooltips3), 
+                        map = kormap1,
+                        color = 'gray',
+                        size = 0.3) + 
+  expand_limits(x = kormap1$long, y = kormap1$lat) +
+  scale_fill_gradient2('인구', low='green', mid = 'lightyellow', high = 'red') +
+  xlab('경도') + ylab('위도') + 
+  labs(title="시도별 결핵환자수")
+
+ggiraph(code = print(tbc_map))
+girafe(ggobj = tbc_map)
+```
+
+
+
+

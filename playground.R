@@ -1017,6 +1017,7 @@ ggplot(d4, aes(x=displ)) +
   scale_y_continuous("연비", limits = c(0, 50)) +
   labs(title = '연도별 통합연비', subtitle = '(굵은선은 2008년)') -> g4
 
+last_plot()
 ggplotly(g4)
 
 # 2
@@ -1025,7 +1026,9 @@ d5
 ggplot(data %>% filter(kor >= 80), aes(cls)) +
   geom_bar(aes(fill=gen), width=0.7) +
   xlab('학급') + ylab('학생수') +
-  labs(title = "국어 우수 학생", subtitle = "(80점 이상)", fill='성별')
+  labs(title = "국어 우수 학생", subtitle = "(80점 이상)", fill='성별') -> t
+
+ggplotly(t)
 
 # 3
 ggplot(data[data$kor >= 95, ], aes(kor)) +
@@ -1086,6 +1089,7 @@ nrow(chodata)
 chodata$sta = substr(chodata$sta, 1, 3)
 
 chodata = data.frame(state = tolower(rownames(USArrests)), USArrests)
+save(chodata, file='data/chodata.rda')
 
 install.packages('ggiraphExtra')
 install.packages('maps')
@@ -1192,7 +1196,92 @@ ggplot(kdata, aes(data = pop, map_id = code)) +
 
 
 ## plotly ######
+install.packages('plotly')
+library(plotly)
+
 ggplot(data, aes(eng, kor)) +
   geom_point(aes(color=eng, size=kor), alpha=0.3) -> t
 
 ggplotly(t)
+
+## dygraphs ######
+install.packages('dygraphs')
+library(dygraphs)
+library(xts)
+
+economics
+ue = xts(economics$unemploy, order.by = economics$date)
+head(ue)
+dygraph(ue)
+
+dygraph(ue) %>% dyRangeSelector()
+psave = xts(economics$psavert, order.by = economics$date)
+head(psave)
+dygraph(psave)
+
+dygraph(cbind(ue, psave))
+ue2 = xts(economics$unemploy / 1000, order.by = economics$date)
+pu = cbind(ue2, psave)
+colnames(pu) = c('unemploy', 'saverate')
+dygraph(pu) %>% dyRangeSelector()
+
+kormaps2014::tbc
+
+save(tbc, file='data/kmap.tbc.rda')
+
+
+####### SQLDF #######
+install.packages('sqldf')
+
+
+d = read.csv('data/성적.csv')
+sqldf("select * from d")
+
+names(d) = iconv(names(d), "cp949", "utf-8")
+d
+
+data
+data %>% filter(kor > 50)
+sqldf("select stuno, kor from data where kor < 50 limit 10")
+sqldf("select stuno, kor from data where kor < 50")
+
+sqldf("select * from data where stuno in (select stuno from data where kor < 50)")
+
+rs = sqldf("select * from data where stuno = '20439'")
+rs
+sqldf("update data set kor = 28 where stuno = '20439'")   # 안됨!!
+class(rs)
+sqldf("select kor, count(*) cnt from data where kor < 30 group by kor order by cnt")
+
+data2 = sqldf("select stuno, avg(kor) avgkor from data group by stuno limit 5")
+sqldf("select * from data2 left outer join data on data.stuno = data2.stuno")
+sqldf("select * from data2 inner join data on data.stuno = data2.stuno")
+
+
+## RMySQL ########
+install.packages('RMySQL')
+library(RMySQL)
+drv = dbDriver("MySQL")
+
+conn = dbConnect(drv, 
+                 host='127.0.0.1', port=3306, 
+                 dbname='dadb', user='dooo', password='dooo!')
+dbListTables(conn) 
+dbSendQuery(conn, 'set character set utf8')
+d = dbGetQuery(conn, "select * from Song limit 5")
+d
+
+sr = dbGetQuery(conn, "select s.songno, s.genre, r.rank from Song s inner join SongRank r on s.songno = r.songno where r.rankdt = '2019-01-25' order by genre")
+sr
+
+dbDisconnect(conn)
+dbUnloadDriver(drv)
+
+
+str(sr)
+
+ggplot(sr) + 
+  geom_point(aes(x=rank, y=genre, size = -rank, col = rank), alpha = 0.5)
+
+sqldf("select * from sr")
+unloadNamespace('RMySQL')
