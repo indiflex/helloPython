@@ -17,3 +17,7 @@ library(xts)
 
 library(sqldf)
 library(RMySQL)
+
+# tm
+library(tm)
+

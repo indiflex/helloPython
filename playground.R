@@ -1285,3 +1285,116 @@ ggplot(sr) +
 
 sqldf("select * from sr")
 unloadNamespace('RMySQL')
+
+
+## Text Mining #########
+install.packages('tm')
+
+getSources()
+getReaders()
+
+folder = system.file("texts", "txt", package="tm")
+folder
+txtSource = DirSource(folder)
+class(txtSource); str(txtSource)   
+
+doc = VCorpus(txtSource, readerControl = list(language='lat'))
+class(doc); summary(doc)
+
+meta(doc)
+meta(doc, type = 'local')
+
+inspect(doc)
+
+inspect(doc[1])
+
+doc[[1]][1]
+
+names(doc)   # c('a.txt', 'b..)
+writeCorpus(doc, path="data", filenames = names(doc))
+
+
+getTransformations()
+doc = tm_map(doc, stripWhitespace)
+
+data("crude")
+crude
+crude[[1]]
+crude[[1]][1] 
+
+stopwords("english")
+
+crude = tm_map(crude, stripWhitespace)
+crude = tm_map(crude, content_transformer(tolower))
+crude = tm_map(crude, removePunctuation)
+crude = tm_map(crude, removeWords, stopwords("english"))
+crude = tm_map(crude, stripWhitespace)
+crude = tm_map(crude, stemDocument, language="english")
+
+tdm = TermDocumentMatrix(crude) 
+tdm
+rownames(tdm) 
+head(as.matrix(tdm))
+tdm['year',] 
+View(as.matrix(tdm)) 
+dimnames(tdm) 
+
+tdm$i
+tdm$j
+tdm$v
+tdm = removeSparseTerms(tdm, 0.8)
+
+t(tdm)
+inspect(tdm)
+inspect(tdm[50:60, 1:20])
+
+findFreqTerms(tdm, 20)
+findFreqTerms(tdm, 10)
+findFreqTerms(tdm, 20, 30)
+findFreqTerms(tdm, 0, 9)
+
+inspect(stemDocument(crude[[1]]))
+
+findAssocs(tdm, "last", 0.5)
+findAssocs(tdm, "oil", .7)
+
+rowSums(as.matrix(tdm)) 
+
+wFreq = sort(rowSums(as.matrix(tdm)), decreasing = T)
+wFreq
+names(wFreq)
+wFreq > 10  
+wFreq = subset(wFreq, wFreq > 10)
+wFreq
+
+install.packages('RColorBrewer')  
+library(RColorBrewer)
+display.brewer.all()
+
+brewer.pal.info
+pa = brewer.pal(8, 'Blues')
+pa
+darks = brewer.pal(8, 'Dark2')
+darks
+install.packages("wordcloud")   
+
+set.seed(100);
+wordcloud(words = names(wFreq), freq=wFreq, min.freq = 1,
+          random.order = F, colors = pa)
+
+## Try This : wordcloud ########
+doc = tm_map(doc, stripWhitespace)
+doc = tm_map(doc, stemDocument, language="english")
+doc = tm_map(doc, removeWords, stopwords("english"))
+doc = tm_map(doc, stripWhitespace)
+doc[[1]][1]
+tdmDoc = TermDocumentMatrix(doc)
+findFreqTerms(tdmDoc, 1)
+docFreq = sort(rowSums(as.matrix(tdmDoc)), decreasing = T)
+docFreq
+docFreq = subset(docFreq, docFreq > 1)
+
+wordcloud(words = names(docFreq), freq=docFreq, min.freq = 1, scale = c(2.5, 0.5),
+          rot.per = 0, random.order = F, random.color = T, colors = darks)
+
+6:1  5
