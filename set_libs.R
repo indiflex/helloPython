@@ -21,3 +21,5 @@ library(RMySQL)
 # tm
 library(tm)
 
+library(RColorBrewer)
+library(wordcloud)

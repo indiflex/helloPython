@@ -986,7 +986,7 @@ g4 = ggplot(mpg, aes(cty)) +
        x = "도시 연비",
        fill = "실린더수")
 
-
+library(ggplot2)
 setFont = function() {
   theme_set(theme_gray(base_family="AppleGothic"))
   par(family = "AppleGothic")
