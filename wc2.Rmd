@@ -1,7 +1,7 @@
 ---
 title: "wc2"
 author: "Jade"
-date: '2019 3 25 '
+date: '2019년 4월 9일'
 output: html_document
 ---
 
@@ -10,12 +10,58 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 ```{r, echo=F}
+library(dplyr)
+library(ggplot2)
 library(twitteR); library(RCurl); library(RJSONIO); library(stringr)
 library(streamR); library(ROAuth)
+library(tm)
+library(RColorBrewer)
+library(wordcloud)
 
-api_key = "TQA3hvxsZr2Fwfrf03slKKNxB"
-api_secret = "Vzlrg6fgOQm1T8SyNRuARwhi5Z5UJP04KhhwLu4KPJ8f0WwmID"
-token = "1905223106-1pUZ0Eqvz9ojDMvwVwcC4Sm8Lqs8OHkQlz3xiRn"
-token_secret = "bE4hyDyB7e6ZyODJV8RTLpj3AcoqPmYk7QtI4m9XmV0YG"
+# mac
+dyn.load(paste0(system2('/usr/libexec/java_home', stdout = TRUE), 
+                '/jre/lib/server/libjvm.dylib'))
+library(rJava)
+library(KoNLP)
+
+load('data/keys.rda')
+setup_twitter_oauth(keyc[1], keyc[2], keyc[3], keyc[4])
+```
+
+```{r}
+tweets = searchTwitter(enc2utf8('미세먼지'), n=100, lan='ko', 
+                       since='2019-03-01', until='2019-03-31')
+
+tdf = twListToDF(tweets)
+# unique(tdf$text)
+nrow(tdf)
+tw = unique(tdf$text)
+
+tw = gsub("[[:cntrl:]]", "", tw) 
+tw = gsub("http[s]?://[[:alnum:].\\/]+", "", tw) 
+tw = gsub("&[[:alnum:]]+;", "", tw)
+tw = gsub("@[[:alnum:]]+", "", tw)
+tw = gsub("@[[:alnum:]]+[:]?", "", tw)
+tw = gsub("[ㄱ-ㅎㅏ-ㅣ]","",tw) 
+tw = gsub("\\s{2,}", " ", tw) 
+tw = gsub("[[:punct:]]", "", tw)  
+tw = gsub("https", "", tw)
+tw = gsub("RT", "", tw)
+tw = gsub("\\s{2,}", " ", tw) 
+tw = gsub('\\p{So}|\\p{Cn}', '', tw, perl = TRUE)
+tw
+wc = sapply(tw, extractNoun, USE.NAMES = F)
+ul = unlist(wc)
+ul = ul[nchar(ul) > 1]
+wc1 = table(ul)
+wc2 = head(sort(wc1, decreasing = T), 100)
+wc2
+wc2['미세'] = 10
+wc2['먼지'] = 10
+theme_set(theme_gray(base_family="AppleGothic"))
+par(family = "AppleGothic")
+
+pal = brewer.pal(9, "Set1")
+wordcloud(names(wc2), freq=wc2, scale=c(5,0.5), rot.per=0.25, min.freq = 2, random.order = F, random.color = T, colors = pal)
 ```
 

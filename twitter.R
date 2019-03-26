@@ -19,7 +19,9 @@ library(rJava)
 library(KoNLP)
 
 # keys are keys.R
-setup_twitter_oauth(api_key, api_secret, token, token_secret)
+# load('data/keys.rda')
+# save(keyc, file='data/keys.rda')
+setup_twitter_oauth(keyc[1], keyc[2], keyc[3], keyc[4])
 
 # searchTwitter(enc2utf8('승리'), n=100, lan='ko')
 
