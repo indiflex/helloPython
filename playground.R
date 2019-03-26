@@ -1467,8 +1467,13 @@ for (i in 1:length(links)) {
     news[i] = str_trim(get_news)
   }, silent = F)
 }
-news
+news[[28]][1]
+length(news)
 removeStopword(news)
+for (i in 1:length(news)) {
+  #news[[i]][1] = removeStopword(news[[i]][1])
+  news[[i]][1] = gsub("flash 오류를 우회하기 위한 함수 추가function flashremoveCallback", "", news[[i]][1])
+}
 removeStopword = function(t) {
   t = gsub("[[:cntrl:]]", "", t) 
   t = gsub("http[s]?://[[:alnum:].\\/]+", "", t) 
@@ -1481,6 +1486,13 @@ removeStopword = function(t) {
   t = gsub("https", "", t)
   t = gsub("RT", "", t)
   t = gsub("\\s{2,}", " ", t) 
-  # mac: emo 제거
+  t = gsub('[[:alnum:]]+@[[:alnum:].]+', '', t)  # email 제거
+  # mac: emo 제거s
   gsub('\\p{So}|\\p{Cn}', '', t, perl = TRUE)
 }
+
+news[[28]][1]
+news[[28]][1] = gsub("[[:cntrl:]]", "", news[[28]][1]) 
+tt
+
+news[[28]][1] = NULL
