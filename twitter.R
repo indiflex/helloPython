@@ -22,10 +22,10 @@ library(KoNLP)
 # load('data/keys.rda')
 # save(keyc, file='data/keys.rda')
 setup_twitter_oauth(keyc[1], keyc[2], keyc[3], keyc[4])
-
+keyc
 # searchTwitter(enc2utf8('승리'), n=100, lan='ko')
 
-tweets = searchTwitter(enc2utf8('승리'), n=100, lan='ko', 
+tweets = searchTwitter(enc2utf8('승리'), n=1000, lan='ko', 
                        since='2019-03-11', until='2019-03-31')
 
 tdf = twListToDF(tweets)
@@ -38,7 +38,6 @@ tdf %>% filter(!isRetweet) %>% select(text)
 
 tdf = tdf %>% filter(regexpr('광고',text) == -1) %>% select(text)
 
-unique(tdf$text)
 tw = unique(tdf$text)
 tw
 head(tw)
@@ -60,16 +59,20 @@ tw = gsub('\\p{So}|\\p{Cn}', '', tw, perl = TRUE)
 
 wc = sapply(tw, extractNoun, USE.NAMES = F)
 wc
+save(wc, file='data/wc.rda')
 ul = unlist(wc)
 ul = ul[nchar(ul) > 1]
 wc1 = table(ul)
 names(wc1)
 length(wc1)
 wc1
-wc2 = head(sort(wc1, decreasing = T), 100)
+wc2 = head(sort(wc1, decreasing = T), 200)
 wc2
 library(RColorBrewer)
 library(wordcloud)
 pal = brewer.pal(9, "Set1")
-wordcloud(names(wc2), freq=wc2, scale=c(5,0.5), rot.per=0.25, min.freq = 2, random.order = F, random.color = T, colors = pal)
+
+theme_set(theme_gray(base_family="AppleGothic"))
+par(family = "AppleGothic")
+wordcloud(names(wc2), freq=wc2, scale=c(5,0.5), rot.per=0.25, min.freq = 3, random.order = F, random.color = T, colors = pal)
 

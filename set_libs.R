@@ -23,3 +23,6 @@ library(tm)
 
 library(RColorBrewer)
 library(wordcloud)
+
+library(arules); library(igraph); library(combinat)
+library(arulesViz); library(visNetwork)

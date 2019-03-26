@@ -1461,7 +1461,6 @@ head(links)
 news = list()
 for (i in 1:length(links)) {
   try({
-    print(links[i])
     htxt = read_html(paste0('https://news.naver.com', links[i]))
     comments = html_nodes(htxt, '#articleBodyContents')
     get_news = repair_encoding(html_text(comments))   # repair_encoding(html_text(comments), from='utf-8')
