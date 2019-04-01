@@ -1475,6 +1475,7 @@ for (i in 1:length(news)) {
   news[[i]][1] = gsub("flash 오류를 우회하기 위한 함수 추가function flashremoveCallback", "", news[[i]][1])
 }
 removeStopword = function(t) {
+  t = gsub('[[:alnum:]]+@[[:alnum:].]+', '', t)  # email 제거
   t = gsub("[[:cntrl:]]", "", t) 
   t = gsub("http[s]?://[[:alnum:].\\/]+", "", t) 
   t = gsub("&[[:alnum:]]+;", "", t)
@@ -1486,7 +1487,6 @@ removeStopword = function(t) {
   t = gsub("https", "", t)
   t = gsub("RT", "", t)
   t = gsub("\\s{2,}", " ", t) 
-  t = gsub('[[:alnum:]]+@[[:alnum:].]+', '', t)  # email 제거
   # mac: emo 제거s
   gsub('\\p{So}|\\p{Cn}', '', t, perl = TRUE)
 }
@@ -1496,3 +1496,107 @@ news[[28]][1] = gsub("[[:cntrl:]]", "", news[[28]][1])
 tt
 
 news[[28]][1] = NULL
+
+
+## Try This: Naver News ########
+removeStopword = function(t) {
+  t = gsub('[[:alnum:]]+@[[:alnum:].]+', '', t)  # email 제거
+  t = gsub("[[:cntrl:]]", "", t) 
+  t = gsub("http[s]?://[[:alnum:].\\/\\-]+", "", t) 
+  t = gsub("&[[:alnum:]]+;", "", t)
+  t = gsub("@[[:alnum:]]+", "", t)
+  t = gsub("@[[:alnum:]]+[:]?", "", t)
+  t = gsub("[ㄱ-ㅎㅏ-ㅣ]","",t) 
+  t = gsub("\\s{2,}", " ", t) 
+  t = gsub("[[:punct:]]", "", t)  
+  t = gsub("https", "", t)
+  t = gsub("RT", "", t)
+  t = gsub("\\s{2,}", " ", t) 
+  # mac: emo 제거s
+  gsub('\\p{So}|\\p{Cn}', '', t, perl = TRUE)
+}
+
+getNewsContent = function(uuu) { 
+  h = read_html(uuu)
+  hh = html_nodes(h, '#articleBodyContents')
+  rr = repair_encoding(html_text(hh))
+  ch = html_children(hh)
+  for (i in 1:length(ch)) {
+    chtxt = html_text(ch[i])
+    if (chtxt == "") next
+    rr = stri_replace_all(rr, "", fixed=html_text(ch[i]))
+  }
+  rr
+  removeStopword(rr)
+}
+
+# getNewsContent("https://news.naver.com/main/read.nhn?oid=003&sid1=101&aid=0009133603&mid=shm&mode=LSD&nh=20190326125557")
+
+# 1. scrap the naver news
+newsUrl = "https://news.naver.com/main/home.nhn"
+html = read_html(newsUrl)
+links1 = html_attr(html_nodes(html, '.newsnow_tx_inner a'), 'href')
+links2 = html_attr(html_nodes(html, '.mlist2.no_bg a'), 'href')
+links = c(links1, links2)
+head(links)
+
+news = list()
+for (i in 1:length(links)) {
+  try({
+    if (regexpr('hotissue', links[i]) != -1 || regexpr('live', links[i]) != -1)
+      next
+    
+    print(links[i])
+    news[i] = str_trim(getNewsContent(links[i]))
+  }, silent = F)
+}
+
+news
+
+# 2. wordcloud
+theme_set(theme_gray(base_family="AppleGothic"))
+par(family = "AppleGothic")
+
+wc = sapply(news, extractNoun, USE.NAMES = F)
+wc1 = unlist(wc)
+wc1 = wc1[ nchar(wc1) > 1 ]
+wc1 = table(wc1)
+wc2 = head(sort(wc1, decreasing = T), 100)
+
+pal = brewer.pal(9, "Set1")
+
+wordcloud(names(wc2), freq=wc2, scale=c(5,0.5),  min.freq = 1, 
+          random.order = F, random.color = T, colors = pal)
+
+
+# 3. 수집 된 뉴스로 연관성 분석 및 작도
+wc
+nouns1 = sapply(wc, function(x) {
+  Filter(function(y='') { nchar(y) <= 4 && nchar(y) > 1 && is.hangul(y) }, x)
+})
+head(nouns1,8)
+nouns1[length(nouns1) > 0, ]
+
+cc = c()
+for (j in 1:length(nouns1)) {
+  print(paste(j, length(nouns1[[j]])))
+  if (length(nouns1[[j]]) == 0) next
+
+  cc = c(cc, nouns1[j])
+}
+cc
+
+length(nouns1)
+wtrans = as(nouns1, "transactions")
+rules = apriori(wtrans, parameter = list(supp=0.5, conf=0.5))
+
+subrules2 <- head(sort(rules, by="confidence"), 30)
+ig <- plot( subrules2, method="graph", control=list(type="items") )
+
+ig_df <- get.data.frame( ig, what = "both" )
+
+visNetwork(
+  nodes = data.frame(id = ig_df$vertices$name,
+                     value = ig_df$vertices$support, ig_df$vertices),
+  edges = ig_df$edges
+) %>% visEdges(ig_df$edges) %>%visOptions( highlightNearest = T )

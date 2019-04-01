@@ -21,8 +21,16 @@ library(RMySQL)
 # tm
 library(tm)
 
+dyn.load(paste0(system2('/usr/libexec/java_home', stdout = TRUE), 
+                '/jre/lib/server/libjvm.dylib'))
+library(rJava)
+library(KoNLP)
+
+
 library(RColorBrewer)
 library(wordcloud)
 
 library(arules); library(igraph); library(combinat)
 library(arulesViz); library(visNetwork)
+
+library(rvest); library(httr); library(stringr)
