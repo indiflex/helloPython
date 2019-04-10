@@ -1600,3 +1600,193 @@ visNetwork(
                      value = ig_df$vertices$support, ig_df$vertices),
   edges = ig_df$edges
 ) %>% visEdges(ig_df$edges) %>%visOptions( highlightNearest = T )
+
+
+## 통계분석 ##########
+data
+table(data$cls)
+n.gen = table(data$gen)
+n.gen
+p.gen = prop.table(n.gen)
+p.gen
+rbind(n.gen, p.gen)
+round(rbind(n.gen, p.gen), 2)
+ct.gen = cbind(n.gen, p.gen)
+ct.gen
+colnames(ct.gen) = c('도수', '상대도수')
+ct.gen
+ct.gen = addmargins(ct.gen, margin = 1)
+
+t.gen_cls = table(data$gen, data$cls)
+p.gen_cls = prop.table(t.gen_cls)
+
+barplot(p.gen, main='성별', xlab="gender", ylab='%', 
+        col=c("red", "blue"), ylim=c(0, 0.7), legend = rownames(p.gen))
+barplot(p.gen_cls, main='성별', xlab="gender", ylab='%', col=c("green", "blue"), 
+        ylim=c(0, 0.2), legend = rownames(p.gen_cls), beside = T)
+
+median(data$kor)
+
+library(dplyr)
+data %>% group_by(cls) %>% summarise(m = mean(kor), n = n())
+data %>% filter(cls == '매') %>% select(kor) %>% summarise(m = mean(kor), n = n())
+
+data2 = data %>% filter(stuno < 10300 | stuno > 30000) %>%
+  group_by(cls) %>% summarise(m = mean(kor), n = n())
+data2
+w = data2$n / sum(data2$n)
+w
+mean(data2$m)
+weighted.mean(data2$m, w)
+library(psych)
+gmdata = c(1100/1000, 1320/1100, 1122/1320)
+gmdata
+geometric.mean(gmdata) - 1
+harmonic.mean(c(100, 50))
+
+t = c(20, 70, 60, 78, 69, 72, 79, 75, 65, 99)
+t2 = c(70, 60, 78, 69, 72, 79, 75, 65)
+mean(t); mean(t2)
+mean(t, trim=0.10) 
+boxplot(t) 
+stem(t, scale = 2)
+stem(t, scale = 3)
+var(t);var(t2)
+sd(t)
+sd(t2)
+
+summary(t)
+IQR(t) 
+range(t)
+range(t2)
+min(t); max(t)
+
+hist(t)
+hist(t, breaks = 10)
+skew(t)
+kurtosi(t)
+summary(t)
+describe(t)
+
+describeBy(data$kor, data$gen, mat=T)
+
+boxplot(kor~cls, data=data, col='lightblue')
+boxplot(kor~gen, data=data, col='lightblue')
+
+
+##  이항 확률 분포 ######
+dbinom(3, size=3, prob = 0.9)
+dbinom(0, size=3, prob = .9)
+dbinom(2, size=3, prob = .9)
+
+pbinom(2, size=3, prob = .9, lower.tail = T)
+pbinom(1, size=3, prob = .9, lower.tail = F)
+
+
+plot(0:10, 
+     pbinom(0:10, size=10, prob=0.7, lower.tail = F), 
+     type = 'h', lwd = 10, col = 'blue',
+     xlab = '성공확률', ylab = '확률',
+     main = '이항 분포 샘플')
+
+dpois(1, lambda = 10)
+ppois(1, lambda = 3.5, lower.tail = T) 
+ppois(1, lambda = 3.5, lower.tail = F)
+
+
+plot(0:10, 
+     dpois(0:10, lambda = 3.5),
+     type = 'h', lwd = 10, col = 'blue',
+     xlab = '성공확률', ylab = '확률',
+     main = '포아송 분포(건당)')
+
+plot(0:10, 
+     ppois(0:10, lambda = 3.5),
+     type = 'h', lwd = 10, col = 'blue',
+     xlab = '성공확률', ylab = '확률',
+     main = '포아송 누적 분포(이하)')
+
+plot(0:10, 
+     ppois(0:10, lambda = 3.5, lower.tail = F),
+     type = 'h', lwd = 10, col = 'blue',
+     xlab = '성공확률', ylab = '확률',
+     main = '포아송 누적 분포(초과)')
+
+pexp(q=1/5, rate=3.5, lower.tail = T) 
+qexp(p=0.5, rate=3.5, lower.tail = T)
+
+## 정규분포 #########
+m = 85; sd = 10
+rnorm(100, m, sd) -> rn 
+rn = sort(rn)
+rn
+
+plot(rn, dnorm(rn, m, sd), type='l')
+abline(v=m, lty=3)   
+abline(v=m + 1.645 * sd, col='blue', lty=3)
+abline(v=m - 1.645 * sd, col='blue', lty=3)
+
+dnorm(90, 85, 10)
+
+pnorm(90, 85, 10, lower.tail = F) 
+qnorm(0.35, 85, 10, lower.tail = F)
+
+### 통계 분석 #########
+
+## 일표본 ########
+
+load('data/data_eng.rda')
+data
+data$avg = apply(data[, 4:8], MARGIN = 1, FUN = mean)
+s = data %>% filter(cls == '매') %>% select(avg)
+describe(s)
+
+orgpar = par(no.readonly = T)
+par(mfrow=c(1,2))  
+boxplot(s)
+hist(s$avg)
+par(orgpar) 
+mean(s$avg)
+
+# 가설: 평균 점수가 63점이다
+t.test(s, alternative = c("two.sided"),
+       mu=64.5, conf.level = 0.95)  
+
+mu = 64.5; se = 0.89; rn = sort(rnorm(1000, mu, se))
+plot(rn, dnorm(rn, mu, se), type = 'l', main = '평균점수', 
+     xlim = c(60, 70))
+abline(v=mu + 1.96 * se, col="blue", lty=3)
+abline(v=mu - 1.96 * se, col="blue", lty=3)
+abline(v=62.785, col='green', lty=5)
+
+
+## 독립 #########
+mnkor = data %>% filter(cls %in% c('매', '난')) %>% select(cls, kor)
+head(mnkor)
+mnkor$cls = factor(mnkor$cls, levels=c('매','난'), labels=c('매', '난'))
+mnkor$cls
+describeBy(mnkor$kor, mnkor$cls, mat = T)
+
+boxplot(mnkor$kor ~ mnkor$cls)
+layout(matrix(c(1,1,2,3), 2, 2, byrow = T))
+boxplot(mnkor$kor ~ mnkor$cls)
+hist(mnkor$kor[mnkor$cls == '매'])
+hist(mnkor$kor[mnkor$cls == '난'])
+par(orgpar)
+
+var.test(mnkor$kor ~ mnkor$cls, data = mnkor)
+
+t.test(mnkor$kor ~ mnkor$cls, data = mnkor,
+       alternative = c("two.sided"),
+       var.equal = T,                 # 등분산검증의 p-value < 0.05 이면 False로!
+       conf.level = 0.95)
+
+mu = 59.4; se = 1.975140; rn = sort(rnorm(1000, mu, se))
+plot(rn, dnorm(rn, mu, se), col='green', type = 'l', main = '평균점수',
+     xlim = c(50, 80), ylim = c(0, 0.25)) 
+abline(v=mu, col="green", lty=5)
+par(new = T)  
+mu = 64.28; se = 1.952381; rn = sort(rnorm(1000, mu, se))
+plot(rn, dnorm(rn, mu, se), col='red', type = 'l', main = '평균점수',
+     xlim = c(50, 80), ylim = c(0, 0.25))
+abline(v=mu, col="red", lty=5)
