@@ -1760,11 +1760,14 @@ abline(v=mu - 1.96 * se, col="blue", lty=3)
 abline(v=62.785, col='green', lty=5)
 
 
-## 독립 #########
+## 독립, Independent/Two samples t-test #########
+# 1. 데이터 준비
 mnkor = data %>% filter(cls %in% c('매', '난')) %>% select(cls, kor)
 head(mnkor)
 mnkor$cls = factor(mnkor$cls, levels=c('매','난'), labels=c('매', '난'))
 mnkor$cls
+
+# 2. 데이터 확인 (기술통계 + 그래프)
 describeBy(mnkor$kor, mnkor$cls, mat = T)
 
 boxplot(mnkor$kor ~ mnkor$cls)
@@ -1774,13 +1777,16 @@ hist(mnkor$kor[mnkor$cls == '매'])
 hist(mnkor$kor[mnkor$cls == '난'])
 par(orgpar)
 
+# 3. 등분산 검정
 var.test(mnkor$kor ~ mnkor$cls, data = mnkor)
 
+# 4. t-test 수행
 t.test(mnkor$kor ~ mnkor$cls, data = mnkor,
        alternative = c("two.sided"),
        var.equal = T,                 # 등분산검증의 p-value < 0.05 이면 False로!
        conf.level = 0.95)
 
+# 5. 결과 그래프 
 mu = 59.4; se = 1.975140; rn = sort(rnorm(1000, mu, se))
 plot(rn, dnorm(rn, mu, se), col='green', type = 'l', main = '평균점수',
      xlim = c(50, 80), ylim = c(0, 0.25)) 
