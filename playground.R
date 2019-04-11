@@ -1796,3 +1796,53 @@ mu = 64.28; se = 1.952381; rn = sort(rnorm(1000, mu, se))
 plot(rn, dnorm(rn, mu, se), col='red', type = 'l', main = '평균점수',
      xlim = c(50, 80), ylim = c(0, 0.25))
 abline(v=mu, col="red", lty=5)
+
+
+
+## ANOVA  ########
+# 2. 
+describeBy(data$kor, data$cls, mat = T)
+
+# 3. 그래프로 확인하기
+ggplot(data, aes(x=cls, y=kor)) +
+  geom_boxplot(outlier.color = 'blue') +
+  ggtitle("각반 국어 성적")
+
+ggplot(data, aes(x=kor)) +
+  geom_histogram(binwidth = 10, col='white') +
+  facet_grid(. ~ data$cls)   # 그룹별로 그려라!
+
+# 4-1. 등분산(분산의 동질성) 검정 (p-value > 0.05 면 등분산)
+bartlett.test(data$kor ~ data$cls, data=data)  # ⇒ p-value = 0.8497 ⇒ 약 85% 동질하다
+
+aaa = aov(data$kor ~ data$cls, data=data)
+summary(aaa)   
+
+TukeyHSD(aaa)
+
+plot(TukeyHSD(aaa)) 
+
+
+draw = function(rn, mu, se, col) {
+  plot(rn, dnorm(rn, mu, se), col=col, type = 'l',
+       xlim = c(50, 80), ylim = c(0, 0.25))
+  abline(v=mu, col=col, lty=5)
+}
+
+mu = 62.6; se = 2.097331; rn = sort(rnorm(1000, mu, se))
+draw(rn, mu, se, 'red')
+par(new = T)
+mu = 59.4; se = 1.975140; rn = sort(rnorm(1000, mu, se))
+draw(rn, mu, se, 'blue')
+par(new = T)
+mu = 64.2833; se = 1.9523; rn = sort(rnorm(1000, mu, se))
+draw(rn, mu, se, 'green')
+par(new = T)
+mu = 66.6; se = 1.964653; rn = sort(rnorm(1000, mu, se))
+draw(rn, mu, se, 'black')
+
+legend('topright',
+       legend=c('국', '난', '매', '죽'),
+       pch=8,
+       col=c('red', 'blue', 'green', 'black'),
+       bg='gray')
